@@ -1,0 +1,46 @@
+# Git y IDE
+.git
+.gitignore
+.gitattributes
+.idea
+.vscode
+.cursor
+*.md
+!README.md
+
+# Dependencias (se instalan en el build)
+/node_modules
+/vendor
+apps/desk-web/node_modules
+
+# Build previos (se regenera en imagen)
+/public/build
+/public/hot
+
+# Env local (Docker inyecta variables)
+.env
+.env.backup
+.env.production
+.env.*.local
+
+# Logs y cache local
+/storage/*.key
+/storage/logs/*
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/bootstrap/cache/*
+.phpunit.result.cache
+.phpunit.cache
+
+# Tests y dev
+/tests
+phpunit.xml
+.dockerignore
+docker-compose.override.yml
+
+# Otros
+*.log
+.DS_Store
+Homestead.json
+Homestead.yaml

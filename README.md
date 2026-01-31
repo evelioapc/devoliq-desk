@@ -6,34 +6,30 @@ SaaS multi-tenant para gestión de servicios: clientes, operaciones, facturació
 
 ## Checklist rápido (copiar-pegar)
 
+### Producción local con Docker (recomendado)
+
 ```bash
-# 1. Clonar e instalar
 git clone <repo> devoliq-desk && cd devoliq-desk
-
-# 2. Configurar
 cp .env.example .env
-php artisan key:generate
-
-# 3. Base de datos (elegir una opción)
-# Opción A: SQLite (local rápido)
-touch database/database.sqlite
-
-# Opción B: PostgreSQL (Docker)
-# En .env: DB_CONNECTION=pgsql, DB_HOST=postgres, etc.
+# (Opcional: editar .env y cambiar DB_PASSWORD)
 docker compose up -d
-# Luego:
-docker compose exec api php artisan migrate --force
-
-# 4. Seed demo
-php artisan db:seed --force
-# O con Docker: docker compose exec api php artisan db:seed --force
-
-# 5. Levantar
-composer install && npm install
-composer run dev
+# App: http://localhost  |  Postgres: localhost:5432
+# Migraciones y APP_KEY se ejecutan al arrancar.
+# Seed demo (una vez): docker compose exec web php artisan db:seed --force
 ```
 
 **Login:** `admin@devoliq.demo` / `password123`
+
+### Local (PHP + Node en el host)
+
+```bash
+cp .env.example .env
+php artisan key:generate
+touch database/database.sqlite   # o usar PostgreSQL
+composer install && npm install
+php artisan migrate && php artisan db:seed --force
+composer run dev
+```
 
 ---
 
@@ -62,15 +58,13 @@ composer run dev
 
 - **App:** http://127.0.0.1:8000
 
-### Con Docker
+### Con Docker (producción local)
 
 ```bash
 cp .env.example .env
-# En .env: DB_CONNECTION=pgsql, DB_HOST=postgres, DB_DATABASE=devoliq_desk, etc.
 docker compose up -d
-docker compose exec api php artisan key:generate
-docker compose exec api php artisan migrate --force
-docker compose exec api php artisan db:seed --force
+# Puertos: 80 (web), 5432 (Postgres). APP_KEY y migraciones se aplican al arrancar.
+docker compose exec web php artisan db:seed --force   # datos demo (una vez)
 ```
 
 ### Solo build de producción (assets)

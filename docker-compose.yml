@@ -1,34 +1,65 @@
+# Devoliq Desk - Producción local (un contenedor web: Nginx + PHP-FPM + Postgres)
+# Uso: docker compose up -d
+# App: http://localhost  |  Postgres: localhost:5432
+
 services:
-  api:
-    build: .
-    container_name: devoliq_api
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    image: devoliq-desk-web:latest
+    container_name: devoliq_web
+    restart: unless-stopped
     ports:
-      - "8000:8000"
+      - "80:80"
     volumes:
-      - .:/var/www/html
-    depends_on:
-      - postgres
+      - ./.env:/var/www/html/.env
+      - devoliq_storage:/var/www/html/storage
+      - devoliq_bootstrap_cache:/var/www/html/bootstrap/cache
     environment:
-      APP_ENV: local
-      APP_DEBUG: "true"
+      APP_NAME: "${APP_NAME:-Devoliq Desk}"
+      APP_ENV: "${APP_ENV:-production}"
+      APP_DEBUG: "${APP_DEBUG:-false}"
+      APP_KEY: "${APP_KEY}"
+      APP_URL: "${APP_URL:-http://localhost}"
       DB_CONNECTION: pgsql
       DB_HOST: postgres
       DB_PORT: 5432
-      DB_DATABASE: devoliq_desk
-      DB_USERNAME: devoliq
-      DB_PASSWORD: devoliq
+      DB_DATABASE: "${DB_DATABASE:-devoliq_desk}"
+      DB_USERNAME: "${DB_USERNAME:-devoliq}"
+      DB_PASSWORD: "${DB_PASSWORD:-devoliq}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - devoliq_net
 
   postgres:
-    image: postgres:16
+    image: postgres:16-alpine
     container_name: devoliq_postgres
+    restart: unless-stopped
     environment:
-      POSTGRES_DB: devoliq_desk
-      POSTGRES_USER: devoliq
-      POSTGRES_PASSWORD: devoliq
+      POSTGRES_DB: "${DB_DATABASE:-devoliq_desk}"
+      POSTGRES_USER: "${DB_USERNAME:-devoliq}"
+      POSTGRES_PASSWORD: "${DB_PASSWORD:-devoliq}"
+    volumes:
+      - devoliq_pg_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
-    volumes:
-      - devoliq_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-devoliq} -d ${DB_DATABASE:-devoliq_desk}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - devoliq_net
+
+networks:
+  devoliq_net:
+    driver: bridge
 
 volumes:
-  devoliq_pg:
+  devoliq_pg_data:
+  devoliq_storage:
+  devoliq_bootstrap_cache:
