@@ -1,0 +1,34 @@
+services:
+  api:
+    build: .
+    container_name: devoliq_api
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - postgres
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: devoliq_desk
+      DB_USERNAME: devoliq
+      DB_PASSWORD: devoliq
+
+  postgres:
+    image: postgres:16
+    container_name: devoliq_postgres
+    environment:
+      POSTGRES_DB: devoliq_desk
+      POSTGRES_USER: devoliq
+      POSTGRES_PASSWORD: devoliq
+    ports:
+      - "5432:5432"
+    volumes:
+      - devoliq_pg:/var/lib/postgresql/data
+
+volumes:
+  devoliq_pg:
